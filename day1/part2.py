@@ -1,9 +1,7 @@
 import numpy as np
 
 # load data as numpy array
-input = np.loadtxt("day1/input_data/input-test.txt", dtype=str)
-
-# Prepare dataset
+input = np.loadtxt("day1/input_data/input1.txt", dtype=str)
 
 def convert_input_to_numeric(input):
     '''
@@ -21,61 +19,65 @@ def convert_input_to_numeric(input):
             raise ValueError("Unexpected rotation direction")
     return input_signed
 
-def drop_hundreds(input_signed):
+def count_hundreds(rot):
     '''
     Drops hundreds place from signed integers
     '''
-    input_dropped_hundreds = []
+    hundreds = abs(rot) //100
 
-    for rot in input_signed:
-        if rot < 0:
-            rot = abs(rot)
-            input_dropped_hundreds.append(- (rot % 100) )
-        else:
-            input_dropped_hundreds.append(rot % 100)
-    return input_dropped_hundreds
+    return hundreds
 
+def drop_hundreds(rot):
+    '''
+    Drops hundreds place
+    '''
+    if rot < 0:
+        rot = abs(rot)
+        rot = -(rot % 100)
+    else:
+        rot = rot % 100
+    return rot
+
+# Convert data to signed numeric
 input_signed = convert_input_to_numeric(input)
-input_dropped_hundreds = drop_hundreds(input_signed)
 
+# initialise variables
 position = 50
 password = 0
 
-for rot in input_dropped_hundreds:
+# main loop
+for rot in input_signed:
 
-    # start state
-    if position < 0:
-        start_state = "NEG"
-    else:
-        start_state = "POS"
-    print(f"start state = {start_state}")
+    # to record whether starting position was 0
+    starting_position = position
 
-    # print(f"starting position = {position}")
     print(f"rotation = {rot}")
+
+    # each full rotation goes past zero
+    hundreds = count_hundreds(rot)
+    password += hundreds
+    print(f"Password updated with {hundreds} hundreds in rotation")
+
+    # remove the hundreds because they've been accounted for
+    rot = drop_hundreds(rot)
+
+    # calculate position after rotation
     position = position + rot
-    # print(f"position after rotation {position}")
+    print(f"position after rotation {position}")
 
-    # end state
-    if position < 0:
-        end_state = "NEG"
-    else:
-        end_state = "POS"
-    print(f"end state = {end_state}")
+    # account for passing zero
+    if starting_position != 0 and (position <= 0 or position >= 100):
+        password += 1
+        print(f"Password updated because passed zero going negative or positive: {password}")
 
+    # convert negative to positive
     if position < 0:
         position = 100 + position
-        # print(f"position after accounting for negative {position}")
-    position = int(str(position)[-2:])
-    print(f"FINAL POSITION {position}")
+        print(f"position after accounting for negative {position}")
 
-    if position == 0:
-        password += 1
-        # print("Password updated")
+    # drop hundreds (cases where position > 100)
+    position = drop_hundreds(position)
 
-    # compare states
-    if start_state != end_state:
-        password += 1
-        print("Password updated because state changed")
+    print(f"POSITION: {position}, PASSWORD: {password} \n")
 
-
-print(f"PASSWORD: {password}")
+print(f"FINAL PASSWORD: {password}")
