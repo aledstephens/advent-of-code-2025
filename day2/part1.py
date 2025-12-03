@@ -32,12 +32,13 @@ for range in ranges:
 
     for num in num_range:
 
-        # skip numbers with less than 2 digits
-        if len(str(num)) < 2:
+        string_num = str(num)
+
+        # skip numbers with odd numbers of digits since they can't be split in half
+        if len(string_num) % 2 != 0:
             continue
 
         # split number in half, check if the halves sub to zero
-        string_num = str(num)
         first_half = string_num[:len(string_num)//2]
         second_half = string_num[len(string_num) // 2:]
 
