@@ -13,45 +13,70 @@ def check_leading_zero(half):
     else:
         return False
 
-def create_num_range(range):
+def create_id_range(id_range):
     # split item on - and make integer range
-    range_start = int(range.split("-")[0])
-    range_end = int(range.split("-")[1])
-    num_range = np.linspace(range_start, range_end, int(range_end) - int(range_start) + 1, dtype=int)
-    return num_range
+    range_start = int(id_range.split("-")[0])
+    range_end = int(id_range.split("-")[1])
+    id_range = np.linspace(range_start, range_end, int(range_end) - int(range_start) + 1, dtype=int)
+    return id_range
+
+def is_single_digit(id):
+    if id < 10:
+        return True
+    else:
+        return False
+
+def does_pattern_length_divide(pat_length, id_length):
+    if id_length % pat_length != 0:
+        print(f"ID length {id_length} not multiple of pattern length {pat_length}")
+        return False
+    else:
+        return True
+
+def does_pattern_match(pat_length, id):
+    # split id into pat_length parts
+    id_str = str(id)
+    parts = [id_str[i:i+pat_length] for i in range(0, len(id_str), pat_length)]
+    print(parts)
+    # compare all parts
+    first_part = parts[0]
+    all_match = all(part == first_part for part in parts)
+    if all_match:
+        print(f"ID {id} matches pattern length {pat_length}")
+        return True
+    else:
+        print(f"ID {id} does not match pattern length {pat_length}")
+        return False
 
 result = 0 # store result
 
-ranges = read_file("input-data.txt")
+id_ranges = read_file("input-data.txt")
 
 # loop through ranges
-for range in ranges:
-    print(f"Range: {range}")
+for id_range in id_ranges:
+    print(f"Range: {id_range}")
 
-    num_range = create_num_range(range)
+    id_range = create_id_range(id_range)
 
-    for num in num_range:
+    for id in id_range:
+        print(f"Checking ID: {id}")
 
-        string_num = str(num)
-
-        # skip numbers with odd numbers of digits since they can't be split in half
-        if len(string_num) % 2 != 0:
+        if is_single_digit(id):
+            print(f"ID {id} is single digit, skipping to next ID")
             continue
 
-        # split number in half, check if the halves sub to zero
-        first_half = string_num[:len(string_num)//2]
-        second_half = string_num[len(string_num) // 2:]
+        id_length = len(str(id))
 
-        # skip leading zeros
-        first_half_leading_zero = check_leading_zero(first_half)
-        second_half_leading_zero = check_leading_zero(second_half)
-        if first_half_leading_zero or second_half_leading_zero:
-            continue
+        for pat_length in range(1, len(str(id))):
+            print(f"Trying pattern length: {pat_length} for ID {id}")
 
-        difference = int(first_half) - int(second_half)
+            if not does_pattern_length_divide(pat_length, id_length):
+                print(f"Pattern length {pat_length} does not divide ID length {id_length}, skipping to next pattern length")
+                continue
 
-        if difference == 0:
-            print(f"Found valid number: {num}")
-            result += num
-
-print(f"\n Result: {result}")
+            if does_pattern_match(pat_length, id):
+                result += id
+                print(f"Found a match. ID {id} added to result, current result: {result}")
+                print(f"Moving to next ID")
+                break
+print("result:", result)
